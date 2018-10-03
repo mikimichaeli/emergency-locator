@@ -2,14 +2,10 @@ import React from 'react';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import {
     blue700, cyan700, pinkA200, grey100, grey400, grey500
 } from 'material-ui/styles/colors';
 
-
-import NotFoundPage from './notFoundPage'
-import HomePage from './homePage';
 import CreatePhoneCall from './createPhoneCall'
 
 const muiTheme = getMuiTheme({
@@ -33,18 +29,12 @@ export default class Layout extends React.Component {
     handleClose = () => this.setState({ drawerOpen: false });
 
     render() {
-        return <BrowserRouter>
-            <MuiThemeProvider muiTheme={muiTheme}>
+        return <MuiThemeProvider muiTheme={muiTheme}>
+            <div>
                 <div>
-                    <div>
-                        <Switch>
-                            <Route path="/" exact component={CreatePhoneCall} />
-                            
-                            <Route component={NotFoundPage} />
-                        </Switch>
-                    </div>
+                    <CreatePhoneCall />
                 </div>
-            </MuiThemeProvider>
-        </BrowserRouter>
+            </div>
+        </MuiThemeProvider>
     }
 }
