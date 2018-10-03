@@ -2,25 +2,32 @@ import React from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import CircularProgress from 'material-ui/CircularProgress';
+import Paper from 'material-ui/Paper';
 import axios from 'axios'
 
+import MapHolder from './mapHolder';
 
-const PULL_RATE = 5000;
+const axiosInstance = axios.create({
+    baseURL: 'http://localhost:3000/',
+});
+
+const PULL_RATE = 300;
 const STATUS = {
     INIT: 'init',
-    SENDING: 'SENDING', 
+    SENDING: 'SENDING',
     WAITING: 'waiting',
     OPENED: 'opened',
     REJECTED: 'rejected',
     CONNECTING: 'connecting',
     ERROR: 'error',
 }
+const LOCK_STATUS = [STATUS.SENDING, STATUS.WAITING, STATUS.OPENED, STATUS.CONNECTING];
 
-export default class HomePage extends React.Component {
+export default class CreatePhoneCall extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = { phoneNumber: '', status: STATUS.INIT };
+        this.state = { phoneNumber: '', status: STATUS.INIT, disabledPhoneNumber: false, location: {} };
         this.phoneCallID = null;
         window.checkInterval = null;
     }
@@ -28,7 +35,7 @@ export default class HomePage extends React.Component {
     sendSMS = () => {
         let me = this;
         this.setState({ status: STATUS.SENDING }, () => {
-            axios.post('http://localhost:3000/api/incident', { phone: this.state.phoneNumber }).then((response) => {
+            axiosInstance.post('/api/incident', { phone: this.state.phoneNumber }).then((response) => {
                 window.phoneCallID = response.data.id;
                 window.checkInterval = setInterval(() => me.checkStatus(), PULL_RATE);
             }).catch(() => {
@@ -38,17 +45,17 @@ export default class HomePage extends React.Component {
     }
 
     checkStatus() {
-        axios.get('http://localhost:3000/api/incident/' + window.phoneCallID).then((response) => {
+        axiosInstance.get('/api/incident/' + window.phoneCallID).then((response) => {
             switch (response.data.status) {
                 case 'location_waiting':
                     this.setState({ status: STATUS.WAITING });
                     break;
                 case 'location_denied':
                     this.setState({ status: STATUS.REJECTED });
+                    clearInterval(window.checkInterval);
                     break;
                 case 'location_approved':
-                    this.setState({ status: STATUS.OPENED });
-                    window.open('/showMap?id=' + window.phoneCallID);
+                    this.setState({ status: STATUS.OPENED, location: response.data.location });
                     clearInterval(window.checkInterval);
                     break;
             }
@@ -58,6 +65,15 @@ export default class HomePage extends React.Component {
         });
     }
 
+    cancelWhileRunning = () => {
+        if (window.checkInterval) {
+            clearInterval(window.checkInterval);
+            window.checkInterval = null;
+        }
+
+        this.setState({ status: STATUS.INIT });
+    }
+
     handleChange = (event) => {
         this.setState({
             phoneNumber: event.target.value
@@ -65,48 +81,60 @@ export default class HomePage extends React.Component {
     };
 
     componentWillUnmount() {
-        if(window.checkInterval) {
+        if (window.checkInterval) {
             clearInterval(window.checkInterval);
             window.checkInterval = null;
         }
     }
 
     render() {
-        let button;
+        let button, map;
         switch (this.state.status) {
             case STATUS.INIT:
                 button = <RaisedButton label="Send Link" primary={true} onClick={this.sendSMS} />;
+                map = undefined;
                 break;
             case STATUS.SENDING:
-                button = <RaisedButton label="Cancel - Sending" secondary={true} icon={<CircularProgress size={25} />} />;
+                button = <RaisedButton label="Cancel - Sending" secondary={true} icon={<CircularProgress size={25} onClick={this.cancelWhileRunning} />} />;
+                map = undefined;
                 break;
             case STATUS.WAITING:
-                button = <RaisedButton label="Cancel - Waiting" secondary={true} icon={<CircularProgress size={25} />} />;
+                button = <RaisedButton label="Cancel - Waiting" secondary={true} icon={<CircularProgress size={25} />} onClick={this.cancelWhileRunning} />;
+                map = undefined;
                 break;
             case STATUS.OPENED:
-                button = <RaisedButton label="Cancel - Opened" secondary={true} icon={<CircularProgress size={25} />} />;
+                button = <RaisedButton label="Cancel - Opened" primary={true} />;
+                map = <MapHolder location={this.state.location} />;
                 break;
             case STATUS.REJECTED:
                 button = <RaisedButton label="Rejected" secondary={true} onClick={this.sendSMS} />;
+                map = undefined;
                 break;
             case STATUS.CONNECTING:
                 button = <RaisedButton label="Connecting" backgroundColor={"#AED581"} />;
+                map = undefined;
                 break;
             case STATUS.ERROR:
                 button = <RaisedButton label="Error" secondary={true} onClick={this.sendSMS} />;
+                map = undefined;
                 break;
             default:
                 button = <RaisedButton label="Error" secondary={true} onClick={this.sendSMS} />;
+                map = undefined;
                 break;
         }
 
         return <div>
-            <TextField
-                value={this.state.phoneNumber}
-                onChange={this.handleChange}
-                floatingLabelText="Enter a phone number"
-            />
-            {button}
+            <Paper zDepth={1}>
+                <TextField
+                    value={this.state.phoneNumber}
+                    onChange={this.handleChange}
+                    disabled={LOCK_STATUS.includes(this.state.status)}
+                    floatingLabelText="Enter a phone number"
+                />
+                {button}
+                {map}
+            </Paper>
         </div>
     }
 }
