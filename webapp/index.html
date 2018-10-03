@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MDA</title>
+    <meta
+            name='viewport'
+            content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'
+    />
+    <script
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+</head>
+<style>
+    body {
+        font-family: "Arial Black";
+        font-size: 1.5em;
+        margin: 20px;
+    }
+
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 50%;
+    }
+
+     .button {
+         border-radius: 4px;
+         background-color: #f4511e;
+         border: none;
+         color: #FFFFFF;
+         text-align: center;
+         font-size: 36px;
+         padding: 20px;
+         transition: all 0.5s;
+         cursor: pointer;
+         margin: 5px;
+     }
+
+    .button span {
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        transition: 0.5s;
+    }
+
+    #retry {
+        display: none;
+    }
+</style>
+<body>
+<img src="logo.png" class="center">
+<p id="message">Requesting Browser Location...</p>
+<div class="center" id="retry"><button class="button"><span>RETRY </span></button></div>
+<script>
+    var x = document.getElementById("message");
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+
+    function showPosition(position) {
+        console.log(position.coords);
+
+        const host = 'https://wll4mj4ekd.execute-api.eu-west-1.amazonaws.com/v1';
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+
+        if (!id) {
+            x.innerHTML = "Incident id is missing";
+            return;
+        }
+
+        $.ajax({
+            url: `${host}/api/incident/${id}`,
+            type: 'PUT',
+            contentType: "application/json",
+            data: JSON.stringify({"location": {"longitude": position.coords.longitude,
+                  "latitude": position.coords.latitude}
+                  }),
+            success: function() {
+                x.innerHTML = "Thank you, location successfully received. Help is on the way.";
+            }, error: function () {
+                $("#retry").show();
+                x.innerHTML = "Location NOT received, please click the RED BUTTON to retry.";
+            }
+        });
+    }
+
+    $(function() {
+
+        $("button").click(function () {
+            $("#retry").hide();
+            x.innerHTML = "Requesting Browser Location...";
+            getLocation();
+        });
+
+        getLocation();
+
+    })
+
+</script>
+</body>
+</html>
