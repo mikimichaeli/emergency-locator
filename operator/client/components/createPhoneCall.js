@@ -11,13 +11,12 @@ const openMapEvent = new CustomEvent("openMap");
 const closeMapEvent = new CustomEvent("closeMap");
 
 const axiosInstance = axios.create({
-    // baseURL: 'http://localhost:3000/',
     baseURL: 'https://wll4mj4ekd.execute-api.eu-west-1.amazonaws.com/v1/',
     credentials: false
 });
 
 const PULL_RATE = 1000;
-const MAX_RETRIES = 10; // TODO change to 30
+const MAX_RETRIES = 60;
 const STATUS = {
     INIT: 'init',
     SENDING: 'SENDING',
