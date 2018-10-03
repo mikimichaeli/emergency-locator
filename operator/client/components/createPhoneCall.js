@@ -8,6 +8,7 @@ import axios from 'axios'
 const PULL_RATE = 5000;
 const STATUS = {
     INIT: 'init',
+    SENDING: 'SENDING', 
     WAITING: 'waiting',
     OPENED: 'opened',
     REJECTED: 'rejected',
@@ -26,33 +27,33 @@ export default class HomePage extends React.Component {
 
     sendSMS = () => {
         let me = this;
-        this.setState({ status: STATUS.WAITING }, () => {
-            axios.post('/api/incident', { phone: this.state.phoneNumber }).then((response) => {
-                window.phoneCallID = response.id; // TODO
+        this.setState({ status: STATUS.SENDING }, () => {
+            axios.post('http://localhost:3000/api/incident', { phone: this.state.phoneNumber }).then((response) => {
+                window.phoneCallID = response.data.id;
                 window.checkInterval = setInterval(() => me.checkStatus(), PULL_RATE);
             }).catch(() => {
-                me.setState({ status: STATUS.ERROR });
+                this.setState({ status: STATUS.ERROR });
             });
         });
     }
 
     checkStatus() {
-        axios.get('/api/incident/' + window.phoneCallID).then((response) => {
-            switch (response.status) {
+        axios.get('http://localhost:3000/api/incident/' + window.phoneCallID).then((response) => {
+            switch (response.data.status) {
                 case 'location_waiting':
-                    me.setState({ status: STATUS.WAITING });
+                    this.setState({ status: STATUS.WAITING });
                     break;
                 case 'location_denied':
-                    me.setState({ status: STATUS.REJECTED });
+                    this.setState({ status: STATUS.REJECTED });
                     break;
                 case 'location_approved':
-                    me.setState({ status: STATUS.OPENED });
+                    this.setState({ status: STATUS.OPENED });
                     window.open('/showMap?id=' + window.phoneCallID);
                     clearInterval(window.checkInterval);
                     break;
             }
         }).catch(() => {
-            me.setState({ status: STATUS.ERROR });
+            this.setState({ status: STATUS.ERROR });
             clearInterval(window.checkInterval);
         });
     }
@@ -76,8 +77,11 @@ export default class HomePage extends React.Component {
             case STATUS.INIT:
                 button = <RaisedButton label="Send Link" primary={true} onClick={this.sendSMS} />;
                 break;
-            case STATUS.WAITING:
+            case STATUS.SENDING:
                 button = <RaisedButton label="Cancel - Sending" secondary={true} icon={<CircularProgress size={25} />} />;
+                break;
+            case STATUS.WAITING:
+                button = <RaisedButton label="Cancel - Waiting" secondary={true} icon={<CircularProgress size={25} />} />;
                 break;
             case STATUS.OPENED:
                 button = <RaisedButton label="Cancel - Opened" secondary={true} icon={<CircularProgress size={25} />} />;

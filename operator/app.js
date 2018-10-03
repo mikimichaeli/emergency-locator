@@ -3,7 +3,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 const debug = process.env.NODE_ENV !== 'production';
 const app = express();
 
