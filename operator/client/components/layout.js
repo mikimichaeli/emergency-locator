@@ -36,9 +36,10 @@ export default class Layout extends React.Component {
         return <BrowserRouter>
             <MuiThemeProvider muiTheme={muiTheme}>
                 <div>
-                    <div style={{ paddingTop: 10, paddingRight: 10, paddingLeft: 10 }}>
+                    <div>
                         <Switch>
-                            <Route path="/" exact component={HomePage} />
+                            <Route path="/" exact component={CreatePhoneCall} />
+                            
                             <Route component={NotFoundPage} />
                         </Switch>
                     </div>
