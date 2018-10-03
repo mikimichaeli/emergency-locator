@@ -56,7 +56,7 @@ export default class CreatePhoneCall extends React.Component {
 
     checkStatus() {
         window.retriesCount++;
-        
+
         if (window.retriesCount >= MAX_RETRIES) {
             clearInterval(window.checkInterval);
             this.setState({ status: STATUS.TIMEOUT });
@@ -155,6 +155,12 @@ export default class CreatePhoneCall extends React.Component {
                     value={this.state.phoneNumber}
                     onChange={this.handleChange}
                     disabled={LOCK_STATUS.includes(this.state.status)}
+                    onKeyDown={(e) => {
+                        let code = e.keyCode ? e.keyCode : e.which;
+                        if (code == 13) { //Enter
+                            this.sendSMS();
+                        }
+                    }}
                     floatingLabelText="Enter a phone number"
                 />
                 {button}
