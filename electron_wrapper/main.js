@@ -7,12 +7,12 @@ const {
 const electron = require('electron')
 const windowSizes = {
   closeMap: {
-    width: 500,
-    height: 100
+    width: 520,
+    height: 120
   },
   openMap: {
-    width: 500,
-    height: 500
+    width: 520,
+    height: 520
   }
 }
 // Keep a global reference of the window object, if you don't, the window will

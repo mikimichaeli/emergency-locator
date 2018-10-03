@@ -6,19 +6,17 @@ import Paper from 'material-ui/Paper';
 import axios from 'axios'
 
 import MapHolder from './mapHolder';
-import Phone from 'material-ui/svg-icons/communication/phone';
-
 
 const openMapEvent = new CustomEvent("openMap");
 const closeMapEvent = new CustomEvent("closeMap");
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:3000/',
-    // baseURL: 'https://wll4mj4ekd.execute-api.eu-west-1.amazonaws.com/v1/',
+    // baseURL: 'http://localhost:3000/',
+    baseURL: 'https://wll4mj4ekd.execute-api.eu-west-1.amazonaws.com/v1/',
     credentials: false
 });
 
-const PULL_RATE = 300;
+const PULL_RATE = 1000;
 const STATUS = {
     INIT: 'init',
     SENDING: 'SENDING',
@@ -55,7 +53,7 @@ export default class CreatePhoneCall extends React.Component {
     }
 
     checkStatus() {
-        axiosInstance.get('/api/incident/' + window.phoneCallID).then((response) => {
+        axiosInstance.get('/api/incident/', { params: { id: window.phoneCallID } }).then((response) => {
             switch (response.data.status) {
                 case 'location_waiting':
                     this.setState({ status: STATUS.WAITING });
