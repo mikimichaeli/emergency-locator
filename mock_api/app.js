@@ -1,9 +1,14 @@
 const express = require('express')
 const app = express()
 const port = 3000
+const cors = require('cors');
+
 
 var session = null;
 count = 0;
+
+app.use(cors());
+
 
 function guid() {
     function s4() {
