@@ -6,6 +6,8 @@ import Paper from 'material-ui/Paper';
 import axios from 'axios'
 
 import MapHolder from './mapHolder';
+import Phone from 'material-ui/svg-icons/communication/phone';
+
 
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:3000/',
@@ -80,6 +82,10 @@ export default class CreatePhoneCall extends React.Component {
         });
     };
 
+    handleClose = () => {
+
+    }
+
     componentWillUnmount() {
         if (window.checkInterval) {
             clearInterval(window.checkInterval);
@@ -103,7 +109,7 @@ export default class CreatePhoneCall extends React.Component {
                 map = undefined;
                 break;
             case STATUS.OPENED:
-                button = <RaisedButton label="Cancel - Opened" primary={true} />;
+                button = <RaisedButton label="Close" primary={true} onClick={this.cancelWhileRunning} />;
                 map = <MapHolder location={this.state.location} />;
                 break;
             case STATUS.REJECTED:
@@ -126,7 +132,9 @@ export default class CreatePhoneCall extends React.Component {
 
         return <div>
             <Paper zDepth={1}>
+                <h3><Phone /> Emergency Locator</h3>
                 <TextField
+                    style={{ marginRight: 10, marginLeft: 10 }}
                     value={this.state.phoneNumber}
                     onChange={this.handleChange}
                     disabled={LOCK_STATUS.includes(this.state.status)}
