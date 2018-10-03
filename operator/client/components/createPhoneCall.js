@@ -17,6 +17,7 @@ const axiosInstance = axios.create({
 });
 
 const PULL_RATE = 1000;
+const MAX_RETRIES = 10; // TODO change to 30
 const STATUS = {
     INIT: 'init',
     SENDING: 'SENDING',
@@ -25,6 +26,7 @@ const STATUS = {
     REJECTED: 'rejected',
     CONNECTING: 'connecting',
     ERROR: 'error',
+    TIMEOUT: 'timeout'
 }
 const buttonStyle = {
     minWidth: 190
@@ -38,6 +40,7 @@ export default class CreatePhoneCall extends React.Component {
         this.state = { phoneNumber: '+972', status: STATUS.INIT, disabledPhoneNumber: false, location: {} };
         window.phoneCallID = null;
         window.checkInterval = null;
+        window.retriesCount = 0;
     }
 
     sendSMS = () => {
@@ -53,6 +56,14 @@ export default class CreatePhoneCall extends React.Component {
     }
 
     checkStatus() {
+        window.retriesCount++;
+        
+        if (window.retriesCount >= MAX_RETRIES) {
+            clearInterval(window.checkInterval);
+            this.setState({ status: STATUS.TIMEOUT });
+            return;
+        }
+
         axiosInstance.get('/api/incident/', { params: { id: window.phoneCallID } }).then((response) => {
             switch (response.data.status) {
                 case 'location_waiting':
@@ -122,6 +133,10 @@ export default class CreatePhoneCall extends React.Component {
                 break;
             case STATUS.CONNECTING:
                 button = <RaisedButton label="Connecting" backgroundColor={"#AED581"} buttonStyle={buttonStyle} />;
+                map = undefined;
+                break;
+            case STATUS.TIMEOUT:
+                button = <RaisedButton label="Timeout - Retry" secondary={true} onClick={this.sendSMS} buttonStyle={buttonStyle} />;
                 map = undefined;
                 break;
             case STATUS.ERROR:
