@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "**/client/reducers/*.js": "javascript",
+        "**/client/*.js": "javascriptreact",
+        "**/client/*/*.js": "javascriptreact",
+        "**/client/*/*/*.js": "javascriptreact"
+    }
+}
