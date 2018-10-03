@@ -104,11 +104,11 @@ export default class CreatePhoneCall extends React.Component {
                 map = undefined;
                 break;
             case STATUS.SENDING:
-                button = <RaisedButton label="Cancel - Sending" secondary={true} icon={<CircularProgress size={25} onClick={this.cancelWhileRunning} buttonStyle={buttonStyle} />} />;
+                button = <RaisedButton label="Cancel - Sending" secondary={true} icon={<CircularProgress size={25} />} onClick={this.cancelWhileRunning} />;
                 map = undefined;
                 break;
             case STATUS.WAITING:
-                button = <RaisedButton label="Cancel - Waiting" secondary={true} icon={<CircularProgress size={25} />} onClick={this.cancelWhileRunning} buttonStyle={buttonStyle} />;
+                button = <RaisedButton label="Cancel - Waiting" secondary={true} icon={<CircularProgress size={25} />} onClick={this.cancelWhileRunning} />;
                 map = undefined;
                 break;
             case STATUS.OPENED:

@@ -34,7 +34,6 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width,
     height,
-    resizable: false,
     maximizable: false,
     alwaysOnTop: true,
     title: 'Emergency Locator',
