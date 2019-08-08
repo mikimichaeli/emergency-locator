@@ -65,3 +65,5 @@ typings/
 
 # dist
 **/dist/
+
+.yml
